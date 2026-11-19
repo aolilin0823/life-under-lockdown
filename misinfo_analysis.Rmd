@@ -1,0 +1,96 @@
+---
+title: "lifeunder"
+author: "Shi Chen"
+date: "`r Sys.Date()`"
+output:
+  word_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+library(readr)
+library(dplyr)
+library(ggplot2)
+library(knitr)
+
+
+
+lul_d<-read_csv('../data/life-under-lockdown-wave2-extract.csv')
+   col_types=cols(
+     col_integer(),
+     col_factor(),
+     col_factor(levels = c(
+       'Nothing at all',
+       'Not very nuch',
+       'A fair amount',
+       'A great deal'
+     )),
+     col_integer()
+   )
+
+```
+
+```{r}
+lul_d%>%
+  ggplot(aes(x=gender))+
+  geom_bar()
+```
+
+```{r}
+lul_d%>%
+  count(gender)%>% kable()
+```
+```{r}
+lul_d%>%
+  ggplot(
+    aes(x=beliefs)
+  )+
+  geom_histogram(binwidth = 1)
+
+```
+```{r}
+lul_d%>%
+  summarise(
+    n=n(),
+    Mdn=median(beliefs),
+    m=mean(beliefs),
+    SD=sd(beliefs),
+  )%>%
+  kable(digits = 2)
+  
+```
+
+#Hypothesis 
+gender is associated with mean number if misinformation beliefs
+```{r}
+lul_d%>%
+  group_by(gender)%>%
+  summarise(
+    n=n(),
+    Mdn=median(beliefs),
+    m=mean(beliefs),
+    SD=sd(beliefs),
+  )%>%
+  kable(digits = 2)
+
+
+```
+There were too few people who indentified in another way for them to be included in the full analysis. Males had slightly more misinformation beliefs (M=0.73, SD=1.13) than female (M=0.61, SD=1.05),but this was not statistically significant, t(494.31)=-1.201, p=0,230.
+
+```{r}
+lul_d%>%
+  filter(gender!='In another way')%>%
+  t.test(
+    formula=beliefs~gender,
+    var.equal=FALSE,
+    data=.
+  )
+
+
+```
